@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using BlogAPI.Utilities;
 
 namespace BlogAPI
 {
@@ -31,6 +32,10 @@ namespace BlogAPI
 
             services.AddDbContextPool<BlogPostsContext>(options => options.UseSqlServer(connectionString));   
             services.AddControllers();
+
+            services.AddScoped(typeof(IDataRepository<>), typeof(DataRepository<>));
+             services.AddScoped(typeof(IRepository<>), typeof(Repository<,>));
+            services.AddScoped(typeof(IFileLogger), typeof(FileLogger));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

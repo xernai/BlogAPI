@@ -14,23 +14,30 @@ namespace AzureAPI.Controllers
     public class BlogPostsController : ControllerBase
     {
         private readonly BlogPostsContext _context;
+        private readonly IDataRepository<BlogPost> _repo;
 
-        public BlogPostsController(BlogPostsContext context)
+        public BlogPostsController(BlogPostsContext context, IDataRepository<BlogPost> repo)
         {
             _context = context;
+            _repo = repo;
         }
 
         // GET: api/BlogPosts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPost()
+        public IEnumerable<BlogPost> GetBlogPosts()
         {
-            return await _context.BlogPosts.ToListAsync();
+            return _context.BlogPosts.OrderByDescending(p => p.PostId);
         }
 
         // GET: api/BlogPosts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BlogPost>> GetBlogPost(int id)
+        public async Task<IActionResult> GetBlogPost([FromRoute] int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var blogPost = await _context.BlogPosts.FindAsync(id);
 
             if (blogPost == null)
@@ -38,13 +45,18 @@ namespace AzureAPI.Controllers
                 return NotFound();
             }
 
-            return blogPost;
+            return Ok(blogPost);
         }
 
         // PUT: api/BlogPosts/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBlogPost(int id, BlogPost blogPost)
+        public async Task<IActionResult> PutBlogPost([FromRoute] int id, [FromBody] BlogPost blogPost)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (id != blogPost.PostId)
             {
                 return BadRequest();
@@ -54,9 +66,9 @@ namespace AzureAPI.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                _repo.Update(blogPost);
+                var save = await _repo.SaveAsync(blogPost);
             }
-
             catch (DbUpdateConcurrencyException)
             {
                 if (!BlogPostExists(id))
@@ -74,38 +86,43 @@ namespace AzureAPI.Controllers
 
         // POST: api/BlogPosts
         [HttpPost]
-        public async Task<ActionResult<BlogPost>> PostBlogPost(BlogPost blogPost)
+        public async Task<IActionResult> PostBlogPost([FromBody] BlogPost blogPost)
         {
-            _context.BlogPosts.Add(blogPost);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            await _context.SaveChangesAsync();
+            _repo.Add(blogPost);
+            var save = await _repo.SaveAsync(blogPost);
 
             return CreatedAtAction("GetBlogPost", new { id = blogPost.PostId }, blogPost);
         }
 
         // DELETE: api/BlogPosts/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<BlogPost>> DeleteBlogPost(int id)
+        public async Task<IActionResult> DeleteBlogPost([FromRoute] int id)
         {
-            var blogPost = await _context.BlogPosts.FindAsync(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
+            var blogPost = await _context.BlogPosts.FindAsync(id);
             if (blogPost == null)
             {
                 return NotFound();
             }
 
-            _context.BlogPosts.Remove(blogPost);
+            _repo.Delete(blogPost);
+            var save = await _repo.SaveAsync(blogPost);
 
-            await _context.SaveChangesAsync();
-
-            return blogPost;
+            return Ok(blogPost);
         }
 
         private bool BlogPostExists(int id)
         {
-
             return _context.BlogPosts.Any(e => e.PostId == id);
-
         }
     }
 }
