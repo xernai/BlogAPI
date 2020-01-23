@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="microsoft.aspnetcore.cors" Version="2.2.0" />
+    <PackageReference Include="microsoft.aspnetcore.spaservices.extensions" Version="3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.sqlserver" Version="3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.tools" Version="3.0">
