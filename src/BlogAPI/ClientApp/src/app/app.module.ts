@@ -1,3 +1,4 @@
+import { RouterModule } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
@@ -20,6 +21,13 @@ import { BlogPostService } from './services/blog-post.service';
   imports: [
     BrowserModule,
     HttpClientModule,
+    RouterModule.forRoot([
+        { path: '', component: BlogPostsComponent, pathMatch: 'full' },
+        { path: 'blogpost/:id', component: BlogPostComponent },
+        { path: 'add', component: BlogPostAddEditComponent },
+        { path: 'blogpost/edit/:id', component: BlogPostAddEditComponent },
+        { path: '**', redirectTo: '/' }
+    ]),
     AppRoutingModule,
     ReactiveFormsModule
   ],
